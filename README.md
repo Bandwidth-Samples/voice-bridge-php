@@ -1,4 +1,4 @@
-# Repo Title REPLACE
+# Voice-Bridge-PHP
 <a href="http://dev.bandwidth.com"><img src="https://s3.amazonaws.com/bwdemos/BW-VMP.png"/></a>
 </div>
 
@@ -6,7 +6,7 @@
 
 <!-- TOC -->
 
-- [Repo Title REPLACE](#repo-title-replace)
+- [Voice-Bridge-PHP](#Voice-Bridge-PHP)
 - [Description](#description)
 - [Bandwidth](#bandwidth)
 - [Environmental Variables](#environmental-variables)
@@ -16,7 +16,7 @@
 <!-- /TOC -->
 
 # Description
-A short description of your sample app and its capabilities.
+A simple PHP sample application demonstrating how to bridge two live calls using the Bandwidth V2 Voice API.
 
 # Bandwidth
 
@@ -32,11 +32,10 @@ The sample app uses the below environmental variables.
 BANDWIDTH_ACCOUNT_ID                 // Your Bandwidth Account Id
 BANDWIDTH_USERNAME                   // Your Bandwidth API Username
 BANDWIDTH_PASSWORD                   // Your Bandwidth API Password
-BANDWIDTH_PHONE_NUMBER                // Your The Bandwidth Phone Number
 BANDWIDTH_VOICE_APPLICATION_ID       // Your Voice Application Id created in the dashboard
 BANDWIDTH_MESSAGING_APPLICATION_ID   // Your Messaging Application Id created in the dashboard
 BASE_URL                             // Your public base url
-PORT                                 // The port number you wish to run the sample on
+PERSONAL_NUMBER                      // The number dialed out to when an inbound call is received on your Bandwidth number
 ```
 
 # Callback URLs
@@ -44,8 +43,8 @@ PORT                                 // The port number you wish to run the samp
 For a detailed introduction to Bandwidth Callbacks see https://dev.bandwidth.com/guides/callbacks/callbacks.html
 
 Below are the callback paths:
-* `/callbacks/voiceCallback`
-* `<add other callbacks>`
+* `/callbacks/inboundCall`
+* `/callbacks/outboundCall`
 
 ## Ngrok
 
