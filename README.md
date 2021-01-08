@@ -32,11 +32,10 @@ The sample app uses the below environmental variables.
 BANDWIDTH_ACCOUNT_ID                 // Your Bandwidth Account Id
 BANDWIDTH_USERNAME                   // Your Bandwidth API Username
 BANDWIDTH_PASSWORD                   // Your Bandwidth API Password
-BANDWIDTH_PHONE_NUMBER               // Your The Bandwidth Phone Number
 BANDWIDTH_VOICE_APPLICATION_ID       // Your Voice Application Id created in the dashboard
 BANDWIDTH_MESSAGING_APPLICATION_ID   // Your Messaging Application Id created in the dashboard
 BASE_URL                             // Your public base url
-PORT                                 // The port number you wish to run the sample on
+PERSONAL_NUMBER                      // The number dialed out to when an inbound call is received on your Bandwidth number
 ```
 
 # Callback URLs

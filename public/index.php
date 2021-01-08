@@ -7,16 +7,16 @@ use Slim\Factory\AppFactory;
 require __DIR__ . '/../vendor/autoload.php';
 
 $BANDWIDTH_ACCOUNT_ID = getenv("BANDWIDTH_ACCOUNT_ID");
-$BANDWIDTH_API_USER = getenv("BANDWIDTH_API_USER");
-$BANDWIDTH_API_PASSWORD = getenv("BANDWIDTH_API_PASSWORD");
+$BANDWIDTH_USERNAME = getenv("BANDWIDTH_API_USER");
+$BANDWIDTH_PASSWORD = getenv("BANDWIDTH_API_PASSWORD");
 $BANDWIDTH_VOICE_APPLICATION_ID = getenv("BANDWIDTH_VOICE_APPLICATION_ID");
 $BASE_URL = getenv("BASE_URL");
 $PERSONAL_NUMBER = getenv("PERSONAL_NUMBER");
 
 $config = new BandwidthLib\Configuration(
     array(
-        "voiceBasicAuthUserName" => $BANDWIDTH_API_USER,
-        "voiceBasicAuthPassword" => $BANDWIDTH_API_PASSWORD
+        "voiceBasicAuthUserName" => $BANDWIDTH_USERNAME,
+        "voiceBasicAuthPassword" => $BANDWIDTH_PASSWORD
     )
 );
 
@@ -44,7 +44,6 @@ $app->post('/callbacks/inboundCall', function (Request $request, Response $respo
 
     try {
         $apiResponse = $voice_client->createCall($BANDWIDTH_ACCOUNT_ID, $body);
-        # $callId = $apiResponse->getResult()->callId;
     } catch (BandwidthLib\APIException $e) {
         $response->getBody()->write($e);
         return $response->withStatus(400);
@@ -72,7 +71,7 @@ $app->post('/callbacks/outboundCall', function (Request $request, Response $resp
     $data = $request->getParsedBody();
 
     $bxmlResponse = new BandwidthLib\Voice\Bxml\Response();
-    
+
     $speakSentence = new BandwidthLib\Voice\Bxml\SpeakSentence("Hold while we connect you. We will begin the bridge now.");
     $speakSentence->voice("kate");
 
