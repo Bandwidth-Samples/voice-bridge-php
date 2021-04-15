@@ -6,17 +6,17 @@ use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$BANDWIDTH_ACCOUNT_ID = getenv("BANDWIDTH_ACCOUNT_ID");
-$BANDWIDTH_USERNAME = getenv("BANDWIDTH_API_USER");
-$BANDWIDTH_PASSWORD = getenv("BANDWIDTH_API_PASSWORD");
-$BANDWIDTH_VOICE_APPLICATION_ID = getenv("BANDWIDTH_VOICE_APPLICATION_ID");
-$BASE_URL = getenv("BASE_URL");
-$PERSONAL_NUMBER = getenv("PERSONAL_NUMBER");
+$BW_ACCOUNT_ID = getenv("BW_ACCOUNT_ID");
+$BW_USERNAME = getenv("BW_API_USER");
+$BW_PASSWORD = getenv("BW_API_PASSWORD");
+$BW_VOICE_APPLICATION_ID = getenv("BW_VOICE_APPLICATION_ID");
+$BASE_CALLBACK_URL = getenv("BASE_CALLBACK_URL");
+$USER_NUMBER = getenv("USER_NUMBER");
 
 $config = new BandwidthLib\Configuration(
     array(
-        "voiceBasicAuthUserName" => $BANDWIDTH_USERNAME,
-        "voiceBasicAuthPassword" => $BANDWIDTH_PASSWORD
+        "voiceBasicAuthUserName" => $BW_USERNAME,
+        "voiceBasicAuthPassword" => $BW_PASSWORD
     )
 );
 
@@ -32,18 +32,18 @@ $app->addErrorMiddleware(true, true, true);
 $voice_client = $client->getVoice()->getClient();
 
 $app->post('/callbacks/inboundCall', function (Request $request, Response $response) {
-    global $BANDWIDTH_ACCOUNT_ID, $BANDWIDTH_VOICE_APPLICATION_ID, $BASE_URL, $PERSONAL_NUMBER, $voice_client;
+    global $BW_ACCOUNT_ID, $BW_VOICE_APPLICATION_ID, $BASE_CALLBACK_URL, $USER_NUMBER, $voice_client;
     $data = $request->getParsedBody();
 
     $body = new BandwidthLib\Voice\Models\ApiCreateCallRequest();
     $body->from = $data['from'];
-    $body->to = $PERSONAL_NUMBER;
-    $body->answerUrl = $BASE_URL . "/callbacks/outboundCall";;
-    $body->applicationId = $BANDWIDTH_VOICE_APPLICATION_ID;
+    $body->to = $USER_NUMBER;
+    $body->answerUrl = $BASE_CALLBACK_URL . "/callbacks/outboundCall";;
+    $body->applicationId = $BW_VOICE_APPLICATION_ID;
     $body->tag = $data['callId'];
 
     try {
-        $apiResponse = $voice_client->createCall($BANDWIDTH_ACCOUNT_ID, $body);
+        $apiResponse = $voice_client->createCall($BW_ACCOUNT_ID, $body);
     } catch (BandwidthLib\APIException $e) {
         $response->getBody()->write($e);
         return $response->withStatus(400);
@@ -67,7 +67,7 @@ $app->post('/callbacks/inboundCall', function (Request $request, Response $respo
 });
 
 $app->post('/callbacks/outboundCall', function (Request $request, Response $response) {
-    global $BANDWIDTH_ACCOUNT_ID, $BANDWIDTH_VOICE_APPLICATION_ID, $BASE_URL, $voice_client;
+    global $BW_ACCOUNT_ID, $BW_VOICE_APPLICATION_ID, $BASE_CALLBACK_URL, $voice_client;
     $data = $request->getParsedBody();
 
     $bxmlResponse = new BandwidthLib\Voice\Bxml\Response();

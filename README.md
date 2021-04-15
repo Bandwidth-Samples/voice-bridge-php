@@ -29,13 +29,13 @@ For more information about API credentials see [here](https://dev.bandwidth.com/
 # Environmental Variables
 The sample app uses the below environmental variables.
 ```java
-BANDWIDTH_ACCOUNT_ID                 // Your Bandwidth Account Id
-BANDWIDTH_USERNAME                   // Your Bandwidth API Username
-BANDWIDTH_PASSWORD                   // Your Bandwidth API Password
-BANDWIDTH_VOICE_APPLICATION_ID       // Your Voice Application Id created in the dashboard
-BANDWIDTH_MESSAGING_APPLICATION_ID   // Your Messaging Application Id created in the dashboard
-BASE_URL                             // Your public base url
-PERSONAL_NUMBER                      // The number dialed out to when an inbound call is received on your Bandwidth number
+BW_ACCOUNT_ID                 // Your Bandwidth Account Id
+BW_USERNAME                   // Your Bandwidth API Username
+BW_PASSWORD                   // Your Bandwidth API Password
+BW_VOICE_APPLICATION_ID       // Your Voice Application Id created in the dashboard
+BW_MESSAGING_APPLICATION_ID   // Your Messaging Application Id created in the dashboard
+BASE_CALLBACK_URL                             // Your public base url
+USER_NUMBER                      // The number dialed out to when an inbound call is received on your Bandwidth number
 ```
 
 # Callback URLs
