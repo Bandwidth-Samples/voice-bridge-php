@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a8d46d8a18ccf91b7100a980cec90066",
+    "content-hash": "a670e1a604d552597f473767f54bbfb7",
     "packages": [
         {
             "name": "apimatic/jsonmapper",
@@ -58,16 +58,16 @@
         },
         {
             "name": "bandwidth/sdk",
-            "version": "v2.14.0",
+            "version": "v8.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Bandwidth/php-sdk.git",
-                "reference": "1f88cd2965aa059f648d542c0579b06842095b95"
+                "reference": "f5647a1a8542e08e2dcd86fb029e7089ff82e6bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Bandwidth/php-sdk/zipball/1f88cd2965aa059f648d542c0579b06842095b95",
-                "reference": "1f88cd2965aa059f648d542c0579b06842095b95",
+                "url": "https://api.github.com/repos/Bandwidth/php-sdk/zipball/f5647a1a8542e08e2dcd86fb029e7089ff82e6bd",
+                "reference": "f5647a1a8542e08e2dcd86fb029e7089ff82e6bd",
                 "shasum": ""
             },
             "require": {
@@ -80,8 +80,7 @@
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "phan/phan": "^1.2",
-                "squizlabs/php_codesniffer": "^2.7"
+                "phpunit/phpunit": "^9"
             },
             "type": "library",
             "autoload": {
@@ -95,14 +94,14 @@
             ],
             "authors": [
                 {
-                    "name": "APIMatic SDK Generator",
-                    "email": "support@apimatic.io",
-                    "homepage": "https://apimatic.io",
-                    "role": "API Tool"
+                    "name": "Bandwidth Inc.",
+                    "email": "support@bandwidth.com",
+                    "homepage": "https://www.bandwidth.com/",
+                    "role": "Owner"
                 }
             ],
             "description": "Bandwidth's set of APIs",
-            "homepage": "https://apimatic.io",
+            "homepage": "https://www.bandwidth.com/",
             "keywords": [
                 "api",
                 "bandwidth",
@@ -110,9 +109,9 @@
             ],
             "support": {
                 "issues": "https://github.com/Bandwidth/php-sdk/issues",
-                "source": "https://github.com/Bandwidth/php-sdk/tree/v2.14.0"
+                "source": "https://github.com/Bandwidth/php-sdk/tree/v8.1.2"
             },
-            "time": "2020-12-09T15:42:09+00:00"
+            "time": "2021-12-16T21:44:16+00:00"
         },
         {
             "name": "fig/http-message-util",

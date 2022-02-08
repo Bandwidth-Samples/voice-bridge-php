@@ -1,6 +1,6 @@
 {
     "require": {
-        "bandwidth/sdk": "^2.14",
+        "bandwidth/sdk": "^8.1.2",
         "slim/slim": "^4.7",
         "slim/http": "^1.2",
         "slim/psr7": "^1.3"

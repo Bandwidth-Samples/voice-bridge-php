@@ -7,8 +7,8 @@ use Slim\Factory\AppFactory;
 require __DIR__ . '/../vendor/autoload.php';
 
 $BW_ACCOUNT_ID = getenv("BW_ACCOUNT_ID");
-$BW_USERNAME = getenv("BW_API_USER");
-$BW_PASSWORD = getenv("BW_API_PASSWORD");
+$BW_USERNAME = getenv("BW_USERNAME");
+$BW_PASSWORD = getenv("BW_PASSWORD");
 $BW_VOICE_APPLICATION_ID = getenv("BW_VOICE_APPLICATION_ID");
 $BASE_CALLBACK_URL = getenv("BASE_CALLBACK_URL");
 $USER_NUMBER = getenv("USER_NUMBER");
@@ -31,14 +31,20 @@ $app->addErrorMiddleware(true, true, true);
 
 $voice_client = $client->getVoice()->getClient();
 
+error_reporting(E_ALL ^ E_DEPRECATED);    # JSON Serializer functions deprecated in PHP 8
+
+$app->get('/', function(Request $request, Response $response) {
+    return $response->withStatus(204);
+}); 
+
 $app->post('/callbacks/inboundCall', function (Request $request, Response $response) {
     global $BW_ACCOUNT_ID, $BW_VOICE_APPLICATION_ID, $BASE_CALLBACK_URL, $USER_NUMBER, $voice_client;
     $data = $request->getParsedBody();
 
-    $body = new BandwidthLib\Voice\Models\ApiCreateCallRequest();
+    $body = new BandwidthLib\Voice\Models\CreateCallRequest();
     $body->from = $data['from'];
     $body->to = $USER_NUMBER;
-    $body->answerUrl = $BASE_CALLBACK_URL . "/callbacks/outboundCall";;
+    $body->answerUrl = $BASE_CALLBACK_URL . "/callbacks/outboundCall";
     $body->applicationId = $BW_VOICE_APPLICATION_ID;
     $body->tag = $data['callId'];
 
@@ -56,6 +62,7 @@ $app->post('/callbacks/inboundCall', function (Request $request, Response $respo
 
     $ring = new BandwidthLib\Voice\Bxml\Ring();
     $ring->duration(30);
+    $ring->answerCall(false);
 
     $bxmlResponse->addVerb($speakSentence);
     $bxmlResponse->addVerb($ring);
