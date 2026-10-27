@@ -1,95 +1,103 @@
 <?php
 
+use Bandwidth\Api\CallsApi;
+use Bandwidth\Configuration;
+use Bandwidth\Model\Bxml\Bridge;
+use Bandwidth\Model\Bxml\Hangup;
+use Bandwidth\Model\Bxml\Response as BxmlResponse;
+use Bandwidth\Model\Bxml\Ring;
+use Bandwidth\Model\Bxml\SpeakSentence;
+use Bandwidth\Model\CreateCall;
+use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$BW_ACCOUNT_ID = getenv("BW_ACCOUNT_ID");
-$BW_USERNAME = getenv("BW_USERNAME");
-$BW_PASSWORD = getenv("BW_PASSWORD");
-$BW_VOICE_APPLICATION_ID = getenv("BW_VOICE_APPLICATION_ID");
-$BASE_CALLBACK_URL = getenv("BASE_CALLBACK_URL");
-$USER_NUMBER = getenv("USER_NUMBER");
+$BW_ACCOUNT_ID = getenv('BW_ACCOUNT_ID');
+$BW_CLIENT_ID = getenv('BW_CLIENT_ID');
+$BW_CLIENT_SECRET = getenv('BW_CLIENT_SECRET');
+$BW_VOICE_APPLICATION_ID = getenv('BW_VOICE_APPLICATION_ID');
+$BW_NUMBER = getenv('BW_NUMBER');
+$USER_NUMBER = getenv('USER_NUMBER');
+$BASE_CALLBACK_URL = getenv('BASE_CALLBACK_URL');
 
-$config = new BandwidthLib\Configuration(
-    array(
-        "voiceBasicAuthUserName" => $BW_USERNAME,
-        "voiceBasicAuthPassword" => $BW_PASSWORD
-    )
-);
+$config = Configuration::getDefaultConfiguration()
+    ->setClientId($BW_CLIENT_ID)
+    ->setClientSecret($BW_CLIENT_SECRET);
+$callsApi = new CallsApi(new Client(), $config);
 
-// Instantiate Bandwidth Client
-$client = new BandwidthLib\BandwidthClient($config);
-
-// Instantiate App
 $app = AppFactory::create();
-
-// Add error middleware
 $app->addErrorMiddleware(true, true, true);
 
-$voice_client = $client->getVoice()->getClient();
+function parseBody(Request $request): ?array
+{
+    $data = json_decode($request->getBody()->getContents(), true);
+    return is_array($data) ? $data : null;
+}
 
-error_reporting(E_ALL ^ E_DEPRECATED);    # JSON Serializer functions deprecated in PHP 8
+function xmlResponse(Response $response, BxmlResponse $bxml): Response
+{
+    $response->getBody()->write($bxml->toBxml());
+    return $response->withHeader('Content-Type', 'application/xml');
+}
 
-$app->get('/', function(Request $request, Response $response) {
-    return $response->withStatus(204);
-}); 
-
-$app->post('/callbacks/inboundCall', function (Request $request, Response $response) {
-    global $BW_ACCOUNT_ID, $BW_VOICE_APPLICATION_ID, $BASE_CALLBACK_URL, $USER_NUMBER, $voice_client;
-    $data = $request->getParsedBody();
-
-    $body = new BandwidthLib\Voice\Models\CreateCallRequest();
-    $body->from = $data['from'];
-    $body->to = $USER_NUMBER;
-    $body->answerUrl = $BASE_CALLBACK_URL . "/callbacks/outboundCall";
-    $body->applicationId = $BW_VOICE_APPLICATION_ID;
-    $body->tag = $data['callId'];
-
-    try {
-        $apiResponse = $voice_client->createCall($BW_ACCOUNT_ID, $body);
-    } catch (BandwidthLib\APIException $e) {
-        $response->getBody()->write($e);
+$app->post('/callbacks/inbound/voice', function (Request $request, Response $response) use ($callsApi, $BW_ACCOUNT_ID, $BW_VOICE_APPLICATION_ID, $BW_NUMBER, $USER_NUMBER, $BASE_CALLBACK_URL) {
+    $data = parseBody($request);
+    if (($data['eventType'] ?? null) !== 'initiate') {
         return $response->withStatus(400);
     }
 
-    $bxmlResponse = new BandwidthLib\Voice\Bxml\Response();
+    $createCall = new CreateCall([
+        'application_id' => $BW_VOICE_APPLICATION_ID,
+        'to' => $USER_NUMBER,
+        'from' => $BW_NUMBER,
+        'answer_url' => "{$BASE_CALLBACK_URL}/callbacks/outbound/voice",
+        'tag' => $data['callId'] ?? null,
+    ]);
 
-    $speakSentence = new BandwidthLib\Voice\Bxml\SpeakSentence("Hold while we connect you");
-    $speakSentence->voice("kate");
+    try {
+        $callsApi->createCall($BW_ACCOUNT_ID, $createCall);
+        $bxml = new BxmlResponse([
+            new SpeakSentence('Hold while we connect you.'),
+            new Ring(duration: 30),
+        ]);
+    } catch (Throwable $e) {
+        error_log('Failed to create call: ' . $e->getMessage());
+        $bxml = new BxmlResponse([
+            new SpeakSentence('An error occurred. Ending call.'),
+            new Hangup(),
+        ]);
+    }
 
-    $ring = new BandwidthLib\Voice\Bxml\Ring();
-    $ring->duration(30);
-    $ring->answerCall(false);
-
-    $bxmlResponse->addVerb($speakSentence);
-    $bxmlResponse->addVerb($ring);
-
-    $response = $response->withStatus(200)->withHeader('Content-Type', 'application/xml');
-    $response->getBody()->write($bxmlResponse->toBxml());
-    return $response;
-
+    return xmlResponse($response, $bxml);
 });
 
-$app->post('/callbacks/outboundCall', function (Request $request, Response $response) {
-    global $BW_ACCOUNT_ID, $BW_VOICE_APPLICATION_ID, $BASE_CALLBACK_URL, $voice_client;
-    $data = $request->getParsedBody();
+$app->post('/callbacks/outbound/voice', function (Request $request, Response $response) {
+    $data = parseBody($request);
+    if ($data === null) {
+        return $response->withStatus(400);
+    }
 
-    $bxmlResponse = new BandwidthLib\Voice\Bxml\Response();
+    $bxml = new BxmlResponse();
 
-    $speakSentence = new BandwidthLib\Voice\Bxml\SpeakSentence("Hold while we connect you. We will begin the bridge now.");
-    $speakSentence->voice("kate");
+    switch ($data['eventType'] ?? null) {
+        case 'answer':
+            $bxml = new BxmlResponse([
+                new SpeakSentence('Hold while we connect you. We will begin to bridge you now.'),
+                new Bridge($data['tag'] ?? ''),
+            ]);
+            break;
+        case 'disconnect':
+            error_log("Call {$data['callId']} has disconnected");
+            break;
+        default:
+            error_log('Unexpected event type ' . ($data['eventType'] ?? 'null') . ' received');
+            break;
+    }
 
-    $bridge = new BandwidthLib\Voice\Bxml\Bridge($data['tag']);
-
-    $bxmlResponse->addVerb($speakSentence);
-    $bxmlResponse->addVerb($bridge);
-
-    $response = $response->withStatus(200)->withHeader('Content-Type', 'application/xml');
-    $response->getBody()->write($bxmlResponse->toBxml());
-    return $response;
+    return xmlResponse($response, $bxml);
 });
 
 $app->run();
